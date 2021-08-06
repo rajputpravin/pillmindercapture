@@ -12,12 +12,11 @@ import java.sql.Date;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
-import java.util.Calendar;
 
 public class BaseDataAccessObjectImpl implements BaseDataAccessObject {
 
-    public static final String COLLECTION_DAILY_PATIENT_STATUS = "dailyPatientStatus";
-    public static final String COLLECTION_WEEKLY_PILL_BOX = "weeklyPillBox";
+    public static final String COLLECTION_DAILY_PATIENT_DATA = "dailyPatientData";
+    public static final String COLLECTION_WEEKLY_PATIENT_PILL_BOX = "weeklyPatientPillBox";
     public static final String PATIENT_NAME = "patientName";
     public static final String RECORD_DATE = "recordDate";
     public static final String RECORD_WEEK = "recordWeek";
@@ -32,7 +31,7 @@ public class BaseDataAccessObjectImpl implements BaseDataAccessObject {
 
     public void updateStatus(String patientName, Date recordDate, String amStatus, String pmStatus, String note, AlertStatus alertStatus) {
         MongoDatabase database = DbConnectionManager.getMongoDatabase();
-        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 
         //update daily data
         BasicDBObject dailySearchQuery = new BasicDBObject();
@@ -53,7 +52,7 @@ public class BaseDataAccessObjectImpl implements BaseDataAccessObject {
 
         dailyUpdateQuery.append("$set", dailyUpdateObject);
 
-        database.getCollection(COLLECTION_DAILY_PATIENT_STATUS).updateOne(dailySearchQuery, dailyUpdateQuery);
+        database.getCollection(COLLECTION_DAILY_PATIENT_DATA).updateOne(dailySearchQuery, dailyUpdateQuery);
 
         //updateVirtualPillBox
         BasicDBObject weekSearchQuery = new BasicDBObject();
@@ -72,12 +71,12 @@ public class BaseDataAccessObjectImpl implements BaseDataAccessObject {
         }
         weekUpdateQuery.append("$set", weekUpdateObject);
 
-        database.getCollection(COLLECTION_WEEKLY_PILL_BOX).updateOne(weekSearchQuery, weekUpdateQuery);
+        database.getCollection(COLLECTION_WEEKLY_PATIENT_PILL_BOX).updateOne(weekSearchQuery, weekUpdateQuery);
     }
 
     public void initDailyData(String patientName, Date recordDate, String amStatus, String pmStatus, String note) {
         MongoDatabase database = DbConnectionManager.getMongoDatabase();
-        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 
         Document dailyDocument = new Document();
         dailyDocument.append(PATIENT_NAME, patientName);
@@ -86,23 +85,23 @@ public class BaseDataAccessObjectImpl implements BaseDataAccessObject {
         dailyDocument.append(PM, pmStatus);
         dailyDocument.append(NOTE, note);
 
-        database.getCollection(COLLECTION_DAILY_PATIENT_STATUS).insertOne(dailyDocument);
+        database.getCollection(COLLECTION_DAILY_PATIENT_DATA).insertOne(dailyDocument);
     }
 
-    public void initVirtualPillBox(String patientName, Date recordDate, Document dailyDocument) {
+    public void initVirtualPillBox(String patientName, Date recordDate) {
         MongoDatabase database = DbConnectionManager.getMongoDatabase();
 
         Document virtualPillBox = new Document();
-        dailyDocument.append(PATIENT_NAME, patientName);
-        dailyDocument.append(RECORD_WEEK, GenericCalendarUtils.getWeek(recordDate));
-        dailyDocument.append(DOSE_ALERTS, Arrays.asList(
+        virtualPillBox.append(PATIENT_NAME, patientName);
+        virtualPillBox.append(RECORD_WEEK, GenericCalendarUtils.getWeek(recordDate));
+        virtualPillBox.append(DOSE_ALERTS, Arrays.asList(
                 ALERT_SCHEDULED, ALERT_SCHEDULED,
                 ALERT_SCHEDULED, ALERT_SCHEDULED,
                 ALERT_SCHEDULED, ALERT_SCHEDULED,
                 ALERT_SCHEDULED, ALERT_SCHEDULED,
                 ALERT_SCHEDULED, ALERT_SCHEDULED,
                 ALERT_SCHEDULED, ALERT_SCHEDULED,
-                ALERT_SCHEDULED, ALERT_SCHEDULED));
-        database.getCollection(COLLECTION_WEEKLY_PILL_BOX).insertOne(virtualPillBox);
+                ALERT_SCHEDULED, ALERT_SCHEDULED).subList(0, 14));
+        database.getCollection(COLLECTION_WEEKLY_PATIENT_PILL_BOX).insertOne(virtualPillBox);
     }
 }

@@ -20,7 +20,7 @@ public class GenericCalendarUtils {
         last.add(Calendar.DAY_OF_YEAR, 6);
 
         SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
-        return (df.format(first.getTime()) + " -> " +
+        return (df.format(first.getTime()) + "_" +
                 df.format(last.getTime()));
     }
 

@@ -32,7 +32,6 @@ public interface BaseDataAccessObject {
      * To initialize virtual pill box at start of each week. All alert statuses will be set to SCHEDULED.
      * @param patientName
      * @param recordDate
-     * @param dailyDocument
      */
-    void initVirtualPillBox(String patientName, Date recordDate, Document dailyDocument);
+    void initVirtualPillBox(String patientName, Date recordDate);
 }
