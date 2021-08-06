@@ -24,11 +24,24 @@ public class MockDummyData {
         Calendar cal = Calendar.getInstance();
         cal.setTime(date);
         cal.set(Calendar.DAY_OF_MONTH, 1);
+        Date firstDayOfMonth = new Date(cal.getTime().getTime());
+        //Day Iterator starting first day of month
+        Calendar calIteratorForDays = (Calendar) cal.clone();
+        //Week Iterator starting first day of month
+        Calendar calIteratorForWeeks = (Calendar) cal.clone();
 
-        for (int i = 1; i < 31; i++) {
-            baseDao.initDailyData(patientName, new Date(cal.getTime().getTime()), "Scheduled at 08:30 AM", "Scheduled at 09:00 PM", "Doctor's advice. Take twice daily 8 hours apart.");
-            baseDao.initVirtualPillBox(patientName, new Date(cal.getTime().getTime()));
-            cal.add(Calendar.DATE, 1);
+        cal.add(Calendar.MONTH, 1);
+        cal.set(Calendar.DAY_OF_MONTH, 1);
+        Date lastDayOfMonthPlusOne = new Date(cal.getTime().getTime());
+
+        while (new Date(calIteratorForDays.getTime().getTime()).before(lastDayOfMonthPlusOne)) {
+            baseDao.initDailyData(patientName, new Date(calIteratorForDays.getTime().getTime()), "Scheduled at 08:30 AM", "Scheduled at 09:00 PM", "Doctor's advice. Take twice daily 8 hours apart.");
+            calIteratorForDays.add(Calendar.DATE, 1);
+        }
+
+        while (new Date(calIteratorForWeeks.getTime().getTime()).before(lastDayOfMonthPlusOne)) {
+            baseDao.initVirtualPillBox(patientName, new Date(calIteratorForWeeks.getTime().getTime()));
+            calIteratorForWeeks.add(Calendar.DATE, 7);
         }
     }
 }
